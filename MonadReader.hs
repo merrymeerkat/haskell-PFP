@@ -140,6 +140,21 @@ data Dog =
   , dogsAddress :: Address
   } deriving (Eq, Show)
 
+-- some sample dogs and people
+chris :: Person
+chris = Person (HumanName "Chris")
+                (DogName "Papu")
+               (Address "Austin")
+
+papu :: Dog
+papu = Dog (DogName "Papu")
+           (Address "Austin")
+
+-- why are we capitalising the constructors? I thought only the types were capitalised?
+-- answer: DogName takes in a String and returns a DogName. We need to write DogName
+-- followed by a string if we wish to get a DogName.  dogsName, on the other hand, is
+-- simply the name given to the DogName component of a Dog. We can use it to retrieve a dog's name, but not to create a dog name ourselves (at least that's my understanding)
+
 getDog :: Person -> Dog
 getDog p =
   Dog (dogName p) (address p)
@@ -151,11 +166,19 @@ getDogRM = do
   addy <- address
   return $ Dog name addy
 
--- see how to write this with bind
---getDogRM' :: Person -> Dog
---getDogRM' = dogName MonadReader.>>= (\n ->
---            address MonadReader.>>= (\a ->
---            return $ Dog n a ))
+-- Write this function with the bind operator
+getDogRM' :: Person -> Dog
+getDogRM' = dogName >>= (\n ->
+            address >>= (\a ->
+            return $ Dog n a ))
+-- Note:
+-- our monadic context here is Person
+-- dogName :: Person -> DogName
+-- address :: Person -> Address
+-- Dog :: DogName -> Address -> Dog
+-- return Dog :: Person -> DogName -> Address -> Dog
+-- return $ Dog n a :: Person -> Dog (as we wished)
+--
 
 -- 22.11 Chapter Exercises
 x = [1, 2, 3]
@@ -230,7 +253,19 @@ sequA = sequenceA [(>3), (<8), even]
 s' = summed <$> ((,) <$> xs C.<*> ys)
 
 
-
+-- sketches
+--getDogRM'' :: Person -> Dog
+--getDogRM'' p = dogName >>= (\n ->
+--               address >>= (\a ->
+--               return $ Dog (n p) (a p)))
+--getDogRM' :: Reader Person Dog
+--getDogRM' = dogName >>= (\n ->
+--            address >>= (\a ->
+--                Dog $ n a))
+--getDogRM' :: Reader Person Dog
+--getDogRM' = Reader $ \r -> dogName r >>= (\n ->
+--                            address r >>= (\a ->
+--                            Dog n a))
 
 
 
